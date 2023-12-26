@@ -10,7 +10,7 @@ esphome:
   comment: smart-gate-v5
   project:
     name: "WDi.Doorhan"
-    version: "20231226-4"
+    version: "20231226-5"
 esp8266:
   board: esp07s
   restore_from_flash: true
