@@ -10,7 +10,7 @@ esphome:
   comment: smart-gate-v5
   project:
     name: "WDi.Doorhan"
-    version: "20231226-3"
+    version: "20231226-4"
 esp8266:
   board: esp07s
   restore_from_flash: true
@@ -45,10 +45,11 @@ ota:
 captive_portal:
 
 wifi:
-  # Set up a wifi access point
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
   ap:
+    ssid: "${plug_name} Hotspot"
     password: "12345678"
-
 web_server:
 
 uart:
@@ -132,7 +133,7 @@ button:
         - sim800l.disconnect
 text:
   - platform: template
-    name: "phone1"
+    name: "${plug_name} phone1"
     id: phone1
     icon: mdi:cellphone
     optimistic: true
@@ -142,7 +143,7 @@ text:
     restore_value: true
 
   - platform: template
-    name: "phone2"
+    name: "${plug_name} phone2"
     id: phone2
     icon: mdi:cellphone
     optimistic: true
@@ -152,7 +153,7 @@ text:
     restore_value: true
 
   - platform: template
-    name: "phone3"
+    name: "${plug_name} phone3"
     id: phone3
     icon: mdi:cellphone
     optimistic: true
