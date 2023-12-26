@@ -10,7 +10,7 @@ esphome:
   comment: smart-gate-v5
   project:
     name: "WDi.Doorhan"
-    version: "20231226-1"
+    version: "20231226-2"
 esp8266:
   board: esp07s
   restore_from_flash: true
@@ -45,23 +45,7 @@ ota:
 captive_portal:
 
 wifi:
-    networks:
-    - ssid: !secret ap_ssid
-      password: !secret ap_password
-      priority: 1.0
-    - ssid: !secret ap_office_ssid
-      password: !secret ap_office_password
-      priority: 2.0
-    - ssid: "Vslink"
-      password: "Byaka2017"
-      priority: 2.0
-    - ssid: "VSHome"
-      password: "Sraka2021"
-      priority: 2.0
-    ap:
-      ssid: "${plug_name} Hotspot"
-      password: "12345678"
-    use_address: ${use_address}
+  ap: {}
 
 web_server:
   port: 80
