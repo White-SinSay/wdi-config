@@ -45,13 +45,11 @@ ota:
 captive_portal:
 
 wifi:
-  ap: {}
+  # Set up a wifi access point
+  ap:
+    password: "12345678"
 
 web_server:
-  port: 80
-  auth:
-    username: esphome
-    password: esphome
 
 uart:
   tx_pin: GPIO1
