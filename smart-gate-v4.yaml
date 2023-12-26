@@ -1,0 +1,357 @@
+substitutions:
+  plug_name: smart-gate-v4
+  ds18b20_1: "0x273cc6f648f68d28"
+  ds18b20_2: "0x273cc6f648f68d21"
+  use_address: 192.168.90.27
+
+esphome:
+  name: "${plug_name}"
+#  friendly_name: doorhan
+  comment: smart-gate-v4
+  project:
+    name: "WDi.Doorhan"
+    version: "20231217-1"
+esp8266:
+  board: esp07s
+  restore_from_flash: true
+
+logger:
+  baud_rate: 0
+  level: none
+
+api:
+  services:
+  - service: send_sms
+    variables:
+      recipient: string
+      message: string
+    then:
+    - sim800l.send_sms:
+        recipient: !lambda 'return recipient;'
+        message: !lambda 'return message;'
+  - service: dial
+    variables:
+      recipient: string
+    then:
+    - sim800l.dial:
+        recipient: !lambda 'return recipient;'
+  - service: connect
+    then:
+      - sim800l.connect
+  - service: disconnect
+    then:
+      - sim800l.disconnect
+ota:
+captive_portal:
+
+wifi:
+    networks:
+    - ssid: !secret ap_ssid
+      password: !secret ap_password
+      priority: 1.0
+    - ssid: !secret ap_office_ssid
+      password: !secret ap_office_password
+      priority: 2.0
+    - ssid: "Vslink"
+      password: "Byaka2017"
+      priority: 2.0
+    - ssid: "VSHome"
+      password: "Sraka2021"
+      priority: 2.0
+    ap:
+      ssid: "${plug_name} Hotspot"
+      password: "12345678"
+    use_address: ${use_address}
+
+web_server:
+  port: 80
+  auth:
+    username: esphome
+    password: esphome
+
+uart:
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+  baud_rate: 9600
+
+dallas:
+  - pin: GPIO2
+    update_interval: 60s
+
+sim800l:
+#  uart_id: sim800
+#########################
+  on_sms_received:
+    # - logger.log:
+    #     format: "Received '%s' from %s"
+    #     args: [ 'message.c_str()', 'sender.c_str()' ]
+    - lambda: |-
+          id(sms_sender).publish_state(sender);
+          id(sms_message).publish_state(message);
+    - lambda: |-
+        if ( (id(sms_sender).state == id(phone1).state) && ( (id(sms_message).state == "door") ) ) {
+          id(relay).turn_on();
+        }
+#    - lambda: |-
+#          id(sms_sender).publish_state(sender);
+#          id(sms_message).publish_state(message);
+#########################
+  on_incoming_call:
+    - lambda: |-
+        id(caller_id_text_sensor).publish_state(caller_id);
+    - lambda: |-
+        if (id(caller_id_text_sensor).state == id(phone1).state)   {
+          id(relay).turn_on();
+        }
+    - lambda: |-
+        if (id(caller_id_text_sensor).state == id(phone2).state)   {
+          id(relay).turn_on();
+        }
+    - lambda: |-
+        if (id(caller_id_text_sensor).state == id(phone3).state)   {
+         id(relay).turn_on();
+        }
+  on_call_connected:
+    - logger.log:
+        format: Call connected
+  on_call_disconnected:
+    - logger.log:
+        format: Call disconnected
+
+#    - lambda: |-
+#        id(caller_id).publish_state(caller_id);
+#########################
+  # on_call_connected:
+  #   - logger.log:
+  #       format: Call connected
+  # on_call_disconnected:
+  #   - logger.log:
+  #       format: Call disconnected
+
+button:
+  - platform: template
+    id: but
+    name: "${plug_name} open button"
+    on_press:
+      - switch.turn_on: relay
+
+  - platform: template
+    id: connect
+    name: "${plug_name} connect"
+    on_press:
+      then:
+        - sim800l.connect
+
+  - platform: template
+    id: disconnect
+    name: "${plug_name} disconnect"
+    on_press:
+      then:
+        - sim800l.disconnect
+text:
+  - platform: template
+    name: "phone1"
+    id: phone1
+    icon: mdi:cellphone
+    optimistic: true
+    min_length: 11
+    max_length: 12
+    mode: text
+    restore_value: true
+
+  - platform: template
+    name: "phone2"
+    id: phone2
+    icon: mdi:cellphone
+    optimistic: true
+    min_length: 11
+    max_length: 12
+    mode: text
+    restore_value: true
+
+  - platform: template
+    name: "phone3"
+    id: phone3
+    icon: mdi:cellphone
+    optimistic: true
+    min_length: 11
+    max_length: 12
+    mode: text
+    restore_value: true
+
+binary_sensor:
+  - platform: sim800l
+    registered:
+      name: "${plug_name} Registered"
+
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT
+      inverted: true
+    name: "${plug_name} GPIO0"
+#    device_class: door
+    filters:
+      - delayed_on: 200ms
+      - delayed_off: 200ms
+
+  - platform: gpio
+    pin:
+      number: GPIO15
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} GPIO15"
+#    device_class: door
+    filters:
+      - delayed_on: 200ms
+      - delayed_off: 200ms
+
+  - platform: gpio
+    pin:
+      number: GPIO12
+      mode: INPUT
+      inverted: true
+    name: "${plug_name} door"
+    device_class: door
+    filters:
+      - delayed_on: 200ms
+      - delayed_off: 500ms
+    on_press:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'door open'
+
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode: INPUT
+      inverted: true
+    name: "${plug_name} door2"
+    device_class: door
+    filters:
+      - delayed_on: 200ms
+      - delayed_off: 500ms
+    on_press:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'door2 open'
+
+  - platform: gpio
+    pin:
+      number: GPIO4
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens"
+    device_class: tamper
+    filters:
+      - delayed_on: 500ms
+      - delayed_off: 2s
+
+  - platform: gpio
+    pin:
+      number: GPIO5
+      mode: INPUT
+      inverted: true
+    name: "${plug_name} ring"
+    device_class: sound
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+sensor:
+  - platform: uptime
+    id: device_uptime
+    internal: true
+
+  # - platform: adc
+  #   pin: A0
+  #   name: "${plug_name} VCC"
+  #   update_interval: 10s
+  #   filters:
+  #     - multiply: 30.5
+
+  - platform: sim800l
+    rssi:
+      name: "${plug_name} Sim800L RSSI"
+
+  - platform: wifi_signal
+    name: "${plug_name} WiFi"
+    update_interval: 60s
+
+  - platform: dallas
+    address: "${ds18b20_1}"
+    name: "${plug_name} int temperature"
+  # - platform: dallas
+  #   address: "id(ds18b20_2).state"
+  #   name: "${plug_name} ext temperature"
+
+switch:
+  - platform: restart
+    name: "${plug_name} restart"
+
+  - platform: gpio
+    pin: GPIO14
+    id: relay
+#    internal: true
+    name: "${plug_name} relay"
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - sim800l.send_sms:
+          recipient: 'id(phone1).state'
+          message: door moving
+      - delay: 1500ms
+      - switch.turn_off: relay
+      - delay: 500ms
+        
+light:
+  - platform: monochromatic
+    name: "${plug_name} led"
+    id: led1
+    output: led_out
+    default_transition_length: 2s
+#    icon: mdi:cupboard-outline
+    restore_mode: RESTORE_DEFAULT_OFF
+
+output:
+  - platform: esp8266_pwm
+    id: led_out
+    pin: GPIO16
+#    min_power: 0.05
+
+text_sensor:
+  - platform: template
+    name: "${plug_name} online"
+    lambda: |-
+      uint32_t uptime = (id(device_uptime).state);
+      int minutes = (uptime % 3600) / 60;
+      int hours = (uptime % 86400) / 3600;
+      int days = uptime / 86400;
+      if (days > 0) {
+        return { (String(days) + " д." + String(hours) + " ч." + String(minutes) + " мин.").c_str() };
+      }
+      if (hours > 0) {
+        return { (String(hours) + " ч. " + String(minutes) + " мин.").c_str() };
+      } else {
+        return { (String(minutes) + " мин.").c_str() };
+      }
+    update_interval: 60s
+    icon: mdi:clock-start
+
+  - platform: version
+    name: "${plug_name} Version"
+    hide_timestamp: True
+
+  - platform: wifi_info
+    ip_address:
+      name: "${plug_name} ip_address"
+      icon: "mdi:ip"
+
+  - platform: template
+    id: sms_sender
+    name: "${plug_name} Sms Sender"
+  - platform: template
+    id: sms_message
+    name: "${plug_name} Sms Message"
+  - platform: template
+    id: caller_id_text_sensor
+    name: "${plug_name} Caller ID"
