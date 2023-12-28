@@ -1,8 +1,8 @@
 substitutions:
   plug_name: smart-gate-v4
-  ds18b20_1: "0x273cc6f648f68d28"
-  ds18b20_2: "0x273cc6f648f68d21"
-  use_address: 192.168.90.27
+  ds18b20_1: "0x9e3ce1d444f36228"
+#  ds18b20_2: "0x273cc6f648f68d21"
+  use_address: 192.168.90.26
 
 esphome:
   name: "${plug_name}"
@@ -10,10 +10,14 @@ esphome:
   comment: smart-gate-v4
   project:
     name: "WDi.Doorhan"
-    version: "20231217-1"
+    version: "20231228-1"
 esp8266:
   board: esp07s
   restore_from_flash: true
+
+dashboard_import:
+  package_import_url: github://White-SinSay/wdi-config/smart-gate-v4.yaml@main
+  import_full_config: true
 
 logger:
   baud_rate: 0
@@ -149,6 +153,17 @@ button:
       then:
         - sim800l.disconnect
 text:
+  - platform: template
+    name: "ds18b20-1"
+#    icon: mdi:cellphone
+    id: ds18b20_1
+    optimistic: true
+    min_length: 17
+    max_length: 18
+    mode: text
+    initial_value : "0x9e3ce1d444f36228"
+
+
   - platform: template
     name: "phone1"
     id: phone1
