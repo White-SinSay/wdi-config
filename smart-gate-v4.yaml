@@ -56,12 +56,7 @@ wifi:
     - ssid: !secret ap_office_ssid
       password: !secret ap_office_password
       priority: 2.0
-    - ssid: "Vslink"
-      password: "Byaka2017"
-      priority: 2.0
-    - ssid: "VSHome"
-      password: "Sraka2021"
-      priority: 2.0
+
     ap:
       ssid: "${plug_name} Hotspot"
       password: "12345678"
@@ -122,16 +117,6 @@ sim800l:
     - logger.log:
         format: Call disconnected
 
-#    - lambda: |-
-#        id(caller_id).publish_state(caller_id);
-#########################
-  # on_call_connected:
-  #   - logger.log:
-  #       format: Call connected
-  # on_call_disconnected:
-  #   - logger.log:
-  #       format: Call disconnected
-
 button:
   - platform: template
     id: but
@@ -162,7 +147,6 @@ text:
     max_length: 18
     mode: text
     initial_value : "0x9e3ce1d444f36228"
-
 
   - platform: template
     name: "phone1"
@@ -209,6 +193,15 @@ binary_sensor:
     filters:
       - delayed_on: 200ms
       - delayed_off: 200ms
+    on_press:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'GPIO0 on'
+    on_release:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'GPIO0 off'
+
 
   - platform: gpio
     pin:
@@ -220,36 +213,51 @@ binary_sensor:
     filters:
       - delayed_on: 200ms
       - delayed_off: 200ms
+    on_press:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'GPIO15 on'
+    on_release:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'GPIO15 off'
 
   - platform: gpio
     pin:
       number: GPIO12
       mode: INPUT
       inverted: true
-    name: "${plug_name} door"
-    device_class: door
+    name: "${plug_name} GPIO12"
+#    device_class: door
     filters:
       - delayed_on: 200ms
-      - delayed_off: 500ms
+      - delayed_off: 200ms
     on_press:
         - sim800l.send_sms:
             recipient: 'id(phone1).state'
-            message: 'door open'
-
+            message: 'GPIO12 on'
+    on_release:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'GPIO12 off'
   - platform: gpio
     pin:
       number: GPIO13
       mode: INPUT
       inverted: true
-    name: "${plug_name} door2"
+#    name: "${plug_name} GPIO13"
     device_class: door
     filters:
       - delayed_on: 200ms
-      - delayed_off: 500ms
+      - delayed_off: 200ms
     on_press:
         - sim800l.send_sms:
             recipient: 'id(phone1).state'
-            message: 'door2 open'
+            message: 'GPIO13 on'
+    on_release:
+        - sim800l.send_sms:
+            recipient: 'id(phone1).state'
+            message: 'GPIO12 off'
 
   - platform: gpio
     pin:
@@ -278,13 +286,6 @@ sensor:
     id: device_uptime
     internal: true
 
-  # - platform: adc
-  #   pin: A0
-  #   name: "${plug_name} VCC"
-  #   update_interval: 10s
-  #   filters:
-  #     - multiply: 30.5
-
   - platform: sim800l
     rssi:
       name: "${plug_name} Sim800L RSSI"
@@ -307,7 +308,7 @@ switch:
   - platform: gpio
     pin: GPIO14
     id: relay
-#    internal: true
+    internal: true
     name: "${plug_name} relay"
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
@@ -316,7 +317,8 @@ switch:
           message: door moving
       - delay: 1500ms
       - switch.turn_off: relay
-      - delay: 500ms
+      - delay: 1000ms
+      - sim800l.disconnect
         
 light:
   - platform: monochromatic
