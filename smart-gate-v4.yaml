@@ -226,7 +226,7 @@ binary_sensor:
     pin:
       number: GPIO12
       mode: INPUT
-      inverted: true
+      inverted: false
     name: "${plug_name} GPIO12"
 #    device_class: door
     filters:
@@ -244,7 +244,7 @@ binary_sensor:
     pin:
       number: GPIO13
       mode: INPUT
-      inverted: true
+      inverted: false
 #    name: "${plug_name} GPIO13"
     device_class: door
     filters:
