@@ -1,0 +1,301 @@
+substitutions:
+  plug_name: wss-v7r
+#  use_address: 192.168.90.25
+#  ds18b20_1: "0x813ce1d4445e9428"
+#  ds18b20_2: "0xb93ce1d444a53228"
+    
+esphome:
+  name: ${plug_name}
+#  friendly_name: def-esp32
+  comment: wss-v7r
+  project:
+    name: "WDi.wss-v7r"
+    version: "20240523-1"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+logger:
+api:
+
+ota:
+captive_portal:
+
+dashboard_import:
+  package_import_url: github://White-SinSay/wdi-config/wss-v7r.yaml@main
+  import_full_config: true
+
+wifi:
+    networks:
+    - ssid: !secret ap_ssid
+      password: !secret ap_password
+      priority: 1.0
+    - ssid: !secret ap_office_ssid
+      password: !secret ap_office_password
+      priority: 2.0
+
+    ap:
+      ssid: "${plug_name} Hotspot"
+      password: "12345678"
+    use_address: ${use_address}
+
+web_server:
+  port: 80
+  auth:
+    username: esphome
+    password: esphome
+
+uart:
+  - id: uart_main
+    tx_pin: TX
+    rx_pin: RX
+    baud_rate: 9600
+
+i2c:
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+dallas:
+  - pin: 0
+    update_interval: 15s
+
+sensor:
+  - platform: uptime
+    id: device_uptime
+    internal: true
+
+  - platform: wifi_signal
+    name: "${plug_name} WiFi"
+    update_interval: 60s
+
+  - platform: dallas
+    index: 0
+    #address: "${ds18b20_1}"
+    name: "${plug_name} Temperature"
+    id: ds18b20
+
+  - platform: dallas
+    index: 1
+#    address: "${ds18b20_2}"
+    name: "${plug_name} Temperature2"
+    id: ds18b20_2
+
+  # - platform: adc
+  #   id: source_sensor
+  #   pin: 35
+  #   update_interval: 2s
+
+  # - platform: resistance
+  #   sensor: source_sensor
+  #   configuration: UPSTREAM
+  #   resistor: 10kOhm
+  #   name: Resistance Sensor
+
+binary_sensor:
+
+############
+  - platform: gpio
+    pin:
+      number: 15
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens1"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 14
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens2"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 5
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens3"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 18
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens4"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 19
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens5"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 23
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens6"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 35
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens7"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 34
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} sens8"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+  - platform: gpio
+    pin:
+      number: 12
+      mode: INPUT
+      inverted: false
+    name: "${plug_name} GPIO12"
+    filters:
+      - delayed_on: 150ms
+      - delayed_off: 150ms
+
+switch:
+  - platform: restart
+    name: "${plug_name} restart"
+
+  - platform: gpio
+    id: r1
+    internal: false
+    name: "${plug_name} relay1"
+    pin:
+      number: 16
+      inverted: no
+
+  - platform: gpio
+    id: r2
+    internal: false
+    name: "${plug_name} relay2"
+    pin:
+      number: 4
+      inverted: no
+
+  - platform: gpio
+    id: r3
+    internal: false
+    name: "${plug_name} relay3"
+    pin:
+      number: 2
+      inverted: no
+
+  - platform: gpio
+    id: r4
+    internal: false
+    name: "${plug_name} relay4"
+    pin:
+      number: 13
+      inverted: no
+
+  - platform: gpio
+    id: r5
+    internal: false
+    name: "${plug_name} relay5"
+    pin:
+      number: 27
+      inverted: no
+
+  - platform: gpio
+    id: r6
+    internal: false
+    name: "${plug_name} relay6"
+    pin:
+      number: 26
+      inverted: no
+
+  - platform: gpio
+    id: r7
+    internal: false
+    name: "${plug_name} relay7"
+    pin:
+      number: 25
+      inverted: no
+
+  - platform: gpio
+    id: r8
+    internal: false
+    name: "${plug_name} relay8"
+    pin:
+      number: 33
+      inverted: no
+
+  - platform: gpio
+    id: r9
+    internal: false
+    name: "${plug_name} relay9"
+    pin:
+      number: 32
+      inverted: no
+
+  - platform: gpio
+    id: r30
+    internal: false
+    name: "${plug_name} relay_30a"
+    pin:
+      number: 17
+      inverted: no
+
+text_sensor:
+  - platform: template
+    name: "${plug_name} online"
+    lambda: |-
+      uint32_t uptime = (id(device_uptime).state);
+      int minutes = (uptime % 3600) / 60;
+      int hours = (uptime % 86400) / 3600;
+      int days = uptime / 86400;
+      if (days > 0) {
+        return { (String(days) + " д." + String(hours) + " ч." + String(minutes) + " мин.").c_str() };
+      }
+      if (hours > 0) {
+        return { (String(hours) + " ч. " + String(minutes) + " мин.").c_str() };
+      } else {
+        return { (String(minutes) + " мин.").c_str() };
+      }
+    update_interval: 60s
+    icon: mdi:clock-start
+
+  - platform: version
+    name: "${plug_name} Version"
+    hide_timestamp: True
+
+  - platform: wifi_info
+    ip_address:
+      name: "${plug_name} ip_address"
+      icon: "mdi:ip" 
