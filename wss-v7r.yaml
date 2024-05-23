@@ -84,19 +84,7 @@ sensor:
     name: "${plug_name} Temperature2"
     id: ds18b20_2
 
-  # - platform: adc
-  #   id: source_sensor
-  #   pin: 35
-  #   update_interval: 2s
-
-  # - platform: resistance
-  #   sensor: source_sensor
-  #   configuration: UPSTREAM
-  #   resistor: 10kOhm
-  #   name: Resistance Sensor
-
 binary_sensor:
-
 ############
   - platform: gpio
     pin:
